@@ -87,6 +87,7 @@ while True:
     # 整点和半点刷新天气数据
     if m == 0 or m == 30:
         tianqi = tq()
+        time.sleep(1)
 
     # 判断早中晚
     if tianqi[6] == h:
