@@ -73,8 +73,12 @@ def print_time_txt():
     screen.blit(timetxt, (520, 450))
     screen.blit(datetxt, (650, 560))
 
+try:
+    tianqi = tq()  # 先获取一次天气信息
+except KeyError:
+    tianqi = ('Error', '', '请求次数过多', '0', '错误', '可能是因为', 0, 0, '','')
+    print("错误，可能是因为请求次数过多")
 
-tianqi = tq()
 # 主循环
 while True:
     for event in pygame.event.get():
