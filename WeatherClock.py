@@ -20,15 +20,15 @@ def tq():
     tq_txt = res.text
     tq_json = json.loads(tq_txt)
     city = tq_json["cityInfo"]["city"]
-    # air_quality = tq_json["data"]["quality"]
     wendu = str(tq_json["data"]["wendu"])
-    # shidu = str(tq_json["data"]["shidu"])
-    # pm25 = str(tq_json["data"]["pm25"])
     typ = tq_json["data"]["forecast"][0]["type"]
     sunrise = tq_json["data"]["forecast"][0]["sunrise"]
     sunset = tq_json["data"]["forecast"][0]["sunset"]
     fx = tq_json["data"]["forecast"][0]["fx"]
     fl = tq_json["data"]["forecast"][0]["fl"]
+    # air_quality = tq_json["data"]["quality"]
+    # shidu = str(tq_json["data"]["shidu"])
+    # pm25 = str(tq_json["data"]["pm25"])
     
 
     # 对日出日落时间取整，便于设置清晨、傍晚 时间段
@@ -40,6 +40,8 @@ def tq():
         sunset_h = int(sunset[:2:]) + 1
     else:
         sunset_h = int(sunset[:2:])
+    
+
     return city, wendu, fx, fl, typ, sunrise_h, sunset_h
 
 
@@ -47,24 +49,14 @@ def print_tianqi_txt(city, wendu, fx, fl, typ, sunrise_h, sunset_h):
     # 文本
     font1 = pygame.font.Font('王漢宗中行書繁.ttf', 60)
     font4 = pygame.font.Font('4108_方正魏碑_GBK.ttf', 30)
-
     tianqi_txt = "{}  {} °C    {} {} ".format(typ, wendu, fx, fl)
     tq_city_txt = font1.render(city, 1, WHITE)
     tianqitxt = font4.render(tianqi_txt, 1, WHITE)
-
     screen.blit(tianqitxt, (74, 120))
     screen.blit(tq_city_txt, (70, 50))
 
 
-def print_time_txt():
-    # 当前日期、时间
-    year = time.strftime("%Y", time.localtime(time.time()))  # 当前年数
-    mon = time.strftime("%m", time.localtime(time.time()))  # 当前月数
-    dat = time.strftime("%d", time.localtime(time.time()))  # 当前日数
-    h = time.strftime("%H", time.localtime(time.time()))
-    m = time.strftime("%M", time.localtime(time.time()))
-    s = time.strftime("%S", time.localtime(time.time()))
-
+def print_time_txt(year, mon, dat, h, m, s):
     font2 = pygame.font.Font('王漢宗中行書繁.ttf', 30)
     font3 = pygame.font.Font('王漢宗中行書繁.ttf', 110)
     date_txt = year + "年" + mon + "月" + dat + "日"
@@ -76,6 +68,7 @@ def print_time_txt():
 
 try:
     tianqi = tq()  # 先获取一次天气信息
+# 处理因为请求次数过多API被禁用的异常
 except KeyError:
     tianqi = ('Error', '请求次数过多', '', '', '可能是因为', '', '')
     print("错误，可能是因为请求次数过多")
@@ -85,15 +78,21 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
-
+    
+    # 获得当前日期、时间
+    year = time.strftime("%Y", time.localtime(time.time()))  # 当前年数
+    mon = time.strftime("%m", time.localtime(time.time()))  # 当前月数
+    dat = time.strftime("%d", time.localtime(time.time()))
     m = int(time.strftime("%M", time.localtime(time.time())))
     h = int(time.strftime("%H", time.localtime(time.time())))
-
+    s = int(time.strftime("%S", time.localtime(time.time())))
+    
     # 整点和半点刷新天气数据
-    if m == 0 or m == 30:
+    if m == 0 or m == 30 and s==0:
+        time.sleep(0.5)
         tianqi = tq()
     
-    # 判断早中晚
+    # 判断早中晚（stage）
     if tianqi[5] == h:
         stage = 1
     elif tianqi[6] == h:
@@ -115,8 +114,7 @@ while True:
     bg = pygame.image.load(bg_n)
 
     # 显示
-    screen.blit(bg, (0, 0))
-    print_time_txt()
+    screen.blit(bg, (0, 0))  #背景
+    print_time_txt(year, mon, dat, h, m, s)
     print_tianqi_txt(*tianqi)
-    time.sleep(0.5)
     pygame.display.flip()
