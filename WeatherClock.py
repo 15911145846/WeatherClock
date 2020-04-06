@@ -83,28 +83,24 @@ while True:
     year = time.strftime("%Y", time.localtime(time.time()))  # 当前年数
     mon = time.strftime("%m", time.localtime(time.time()))  # 当前月数
     dat = time.strftime("%d", time.localtime(time.time()))
-    m = int(time.strftime("%M", time.localtime(time.time())))
-    h = int(time.strftime("%H", time.localtime(time.time())))
-    s = int(time.strftime("%S", time.localtime(time.time())))
-    
-    # 整点和半点刷新天气数据
-    if m == 0 or m == 30 and s==0:
-        time.sleep(0.5)
-        tianqi = tq()
+    m = time.strftime("%M", time.localtime(time.time()))
+    h = time.strftime("%H", time.localtime(time.time()))
+    s = time.strftime("%S", time.localtime(time.time()))
+    inth = int(h)
     
     # 判断早中晚（stage）
-    if tianqi[5] == h:
+    if tianqi[5] == inth:
         stage = 1
-    elif tianqi[6] == h:
+    elif tianqi[6] == inth:
         stage = 2
     else:
-        if 6 <= h < 12:
+        if 6 <= inth < 12:
             stage = 3
-        elif 12 <= h < 15:
+        elif 12 <= inth < 15:
             stage = 4
-        elif 15 <= h < 19:
+        elif 15 <= inth < 19:
             stage = 5
-        elif 19 <= h < 23:
+        elif 19 <= inth < 23:
             stage = 6
         else:
             stage = 7
