@@ -14,21 +14,22 @@ WHITE = (255, 250, 250)
 
 
 def tq():
-    # 整理 json 文件
-    url = 'http://t.weather.sojson.com/api/weather/city/101010100'
+    # 调用API，获得并整理 json 文件
+    url = 'http://t.weather.sojson.com/api/weather/city/101080101'
     res = requests.get(url)
     tq_txt = res.text
     tq_json = json.loads(tq_txt)
     city = tq_json["cityInfo"]["city"]
-    air_quality = tq_json["data"]["quality"]
+    # air_quality = tq_json["data"]["quality"]
     wendu = str(tq_json["data"]["wendu"])
-    shidu = str(tq_json["data"]["shidu"])
-    pm25 = str(tq_json["data"]["pm25"])
+    # shidu = str(tq_json["data"]["shidu"])
+    # pm25 = str(tq_json["data"]["pm25"])
     typ = tq_json["data"]["forecast"][0]["type"]
     sunrise = tq_json["data"]["forecast"][0]["sunrise"]
     sunset = tq_json["data"]["forecast"][0]["sunset"]
     fx = tq_json["data"]["forecast"][0]["fx"]
     fl = tq_json["data"]["forecast"][0]["fl"]
+    
 
     # 对日出日落时间取整，便于设置清晨、傍晚 时间段
     if int(sunrise[3]) >= 3:
@@ -39,10 +40,10 @@ def tq():
         sunset_h = int(sunset[:2:]) + 1
     else:
         sunset_h = int(sunset[:2:])
-    return city, air_quality, wendu, shidu, pm25, typ, sunrise_h, sunset_h, fx, fl
+    return city, wendu, fx, fl, typ, sunrise_h, sunset_h
 
 
-def print_tianqi_txt(city, wendu, fx, fl, typ):
+def print_tianqi_txt(city, wendu, fx, fl, typ, sunrise_h, sunset_h):
     # 文本
     font1 = pygame.font.Font('王漢宗中行書繁.ttf', 60)
     font4 = pygame.font.Font('4108_方正魏碑_GBK.ttf', 30)
@@ -56,7 +57,7 @@ def print_tianqi_txt(city, wendu, fx, fl, typ):
 
 
 def print_time_txt():
-    # 当前日期
+    # 当前日期、时间
     year = time.strftime("%Y", time.localtime(time.time()))  # 当前年数
     mon = time.strftime("%m", time.localtime(time.time()))  # 当前月数
     dat = time.strftime("%d", time.localtime(time.time()))  # 当前日数
@@ -76,7 +77,7 @@ def print_time_txt():
 try:
     tianqi = tq()  # 先获取一次天气信息
 except KeyError:
-    tianqi = ('Error', '', '请求次数过多', '0', '错误', '可能是因为', 0, 0, '','')
+    tianqi = ('Error', '请求次数过多', '', '', '可能是因为', '', '')
     print("错误，可能是因为请求次数过多")
 
 # 主循环
@@ -91,12 +92,11 @@ while True:
     # 整点和半点刷新天气数据
     if m == 0 or m == 30:
         tianqi = tq()
-        time.sleep(1)
-
+    
     # 判断早中晚
-    if tianqi[6] == h:
+    if tianqi[5] == h:
         stage = 1
-    elif tianqi[7] == h:
+    elif tianqi[6] == h:
         stage = 2
     else:
         if 6 <= h < 12:
@@ -117,5 +117,6 @@ while True:
     # 显示
     screen.blit(bg, (0, 0))
     print_time_txt()
-    print_tianqi_txt(tianqi[0], tianqi[2], tianqi[8], tianqi[9], tianqi[5])
+    print_tianqi_txt(*tianqi)
+    time.sleep(0.5)
     pygame.display.flip()
