@@ -1,8 +1,27 @@
-import pygame
+# 一个可以显示天气情况的时钟
+# by muzing
+
+# 检测并自动安装第三方库
+try:
+    import pygame
+except ModuleNotFoundError:
+    print("检测到未安装 pygame 模块，开始自动安装")
+    import os
+    os.system("pip install -i https://pypi.tuna.tsinghua.edu.cn/simple pygame")
+    import pygame
+
+try:
+    import requests
+except ModuleNotFoundError:
+    print("检测到未安装requests模块，开始自动安装")
+    import os
+    os.system("pip install -i https://pypi.tuna.tsinghua.edu.cn/simple requests")
+    import requests
+
 from sys import exit
 import time
-import requests
 import json
+
 
 pygame.init()
 
@@ -29,9 +48,8 @@ def tq():
     # air_quality = tq_json["data"]["quality"]
     # shidu = str(tq_json["data"]["shidu"])
     # pm25 = str(tq_json["data"]["pm25"])
-    
 
-    # 对日出日落时间取整，便于设置清晨、傍晚 时间段
+    # 对日出日落时间取整，便于设置日出、日落时间段
     if int(sunrise[3]) >= 3:
         sunrise_h = int(sunrise[:2:]) + 1
     else:
@@ -40,13 +58,12 @@ def tq():
         sunset_h = int(sunset[:2:]) + 1
     else:
         sunset_h = int(sunset[:2:])
-    
 
     return city, wendu, fx, fl, typ, sunrise_h, sunset_h
 
 
 def print_tianqi_txt(city, wendu, fx, fl, typ, sunrise_h, sunset_h):
-    # 文本
+    # 显示天气文本
     font1 = pygame.font.Font('王漢宗中行書繁.ttf', 60)
     font4 = pygame.font.Font('4108_方正魏碑_GBK.ttf', 30)
     tianqi_txt = "{}  {} °C    {} {} ".format(typ, wendu, fx, fl)
@@ -57,6 +74,7 @@ def print_tianqi_txt(city, wendu, fx, fl, typ, sunrise_h, sunset_h):
 
 
 def print_time_txt(year, mon, dat, h, m, s):
+    # 显示时间文本
     font2 = pygame.font.Font('王漢宗中行書繁.ttf', 30)
     font3 = pygame.font.Font('王漢宗中行書繁.ttf', 110)
     date_txt = year + "年" + mon + "月" + dat + "日"
@@ -66,19 +84,27 @@ def print_time_txt(year, mon, dat, h, m, s):
     screen.blit(timetxt, (520, 450))
     screen.blit(datetxt, (650, 560))
 
+
 try:
     tianqi = tq()  # 先获取一次天气信息
+
 # 处理因为请求次数过多API被禁用的异常
 except KeyError:
     tianqi = ('Error', '请求次数过多', '', '', '可能是因为', '', '')
     print("错误，可能是因为请求次数过多")
+
+# 处理因为网络未连接的异常
+except Exception:
+    tianqi = ('Error', '未连接至互联网', '', '', '可能是因为', '', '')
+    print("错误，可能是因为网络未连接")
+
 
 # 主循环
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             exit()
-    
+
     # 获得当前日期、时间
     year = time.strftime("%Y", time.localtime(time.time()))  # 当前年数
     mon = time.strftime("%m", time.localtime(time.time()))  # 当前月数
@@ -87,7 +113,7 @@ while True:
     h = time.strftime("%H", time.localtime(time.time()))
     s = time.strftime("%S", time.localtime(time.time()))
     inth = int(h)
-    
+
     # 判断早中晚（stage）
     if tianqi[5] == inth:
         stage = 1
@@ -110,7 +136,7 @@ while True:
     bg = pygame.image.load(bg_n)
 
     # 显示
-    screen.blit(bg, (0, 0))  #背景
+    screen.blit(bg, (0, 0))  # 背景
     print_time_txt(year, mon, dat, h, m, s)
     print_tianqi_txt(*tianqi)
     pygame.display.flip()
