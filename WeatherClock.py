@@ -2,22 +2,8 @@
 # by muzing
 
 # 检测并自动安装第三方库
-try:
-    import pygame
-except ModuleNotFoundError:
-    print("检测到未安装 pygame 模块，开始自动安装")
-    import os
-    os.system("pip install -i https://pypi.tuna.tsinghua.edu.cn/simple pygame")
-    import pygame
-
-try:
-    import requests
-except ModuleNotFoundError:
-    print("检测到未安装requests模块，开始自动安装")
-    import os
-    os.system("pip install -i https://pypi.tuna.tsinghua.edu.cn/simple requests")
-    import requests
-
+import ModuleInstall
+import pygame, requests
 from sys import exit
 import time
 import json
