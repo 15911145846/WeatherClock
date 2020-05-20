@@ -3,11 +3,11 @@
 
 # 检测并自动安装第三方库
 import ModuleInstall
-import pygame, requests
+import pygame
+import requests
 from sys import exit
 import time
 import json
-
 
 pygame.init()
 
@@ -48,7 +48,7 @@ def tq():
     return city, wendu, fx, fl, typ, sunrise_h, sunset_h
 
 
-def print_tianqi_txt(city, wendu, fx, fl, typ, sunrise_h, sunset_h):
+def display_tianqi_txt(city, wendu, fx, fl, typ, sunrise_h, sunset_h):
     # 显示天气文本
     font1 = pygame.font.Font('王漢宗中行書繁.ttf', 60)
     font4 = pygame.font.Font('4108_方正魏碑_GBK.ttf', 30)
@@ -59,7 +59,29 @@ def print_tianqi_txt(city, wendu, fx, fl, typ, sunrise_h, sunset_h):
     screen.blit(tq_city_txt, (70, 50))
 
 
-def print_time_txt(year, mon, dat, h, m, s):
+def YiYan():
+    # 调用 一言 的API，获得一言
+    url = 'https://v1.hitokoto.cn'
+    res = requests.get(url, params={"c": "i",
+                                    "encode": "json",
+                                    "charset": "utf-8"})
+    sentence_txt = res.text
+    sentence_json = json.loads(sentence_txt)
+    # print(sentence_json)
+    hitokoto = "『" + sentence_json["hitokoto"] + "』"
+    from_who = str(sentence_json["from_who"])
+    uuid = str(sentence_json["uuid"])
+    out_txt = hitokoto
+    return out_txt
+
+
+def Display_YiYan(txt):
+    font5 = pygame.font.Font('4117_方正行楷_GBK.ttf', 22)
+    sct_txt = font5.render(txt, 1, WHITE)
+    screen.blit(sct_txt, (34, 560))
+
+
+def display_time_txt(year, mon, dat, h, m, s):
     # 显示时间文本
     font2 = pygame.font.Font('王漢宗中行書繁.ttf', 30)
     font3 = pygame.font.Font('王漢宗中行書繁.ttf', 110)
@@ -67,23 +89,25 @@ def print_time_txt(year, mon, dat, h, m, s):
     time_now = ("{}:{}:{}".format(h, m, s))
     datetxt = font2.render(date_txt, 1, WHITE)
     timetxt = font3.render(time_now, 1, WHITE)
-    screen.blit(timetxt, (520, 450))
+    screen.blit(timetxt, (530, 450))
     screen.blit(datetxt, (650, 560))
 
 
 try:
     tianqi = tq()  # 先获取一次天气信息
+    yiyan = YiYan()
 
 # 处理因为请求次数过多API被禁用的异常
 except KeyError:
     tianqi = ('Error', '请求次数过多', '', '', '可能是因为', '', '')
+    yiyan = ""
     print("错误，可能是因为请求次数过多")
 
 # 处理因为网络未连接的异常
-except Exception:
+except requests.exceptions.ConnectionError:
     tianqi = ('Error', '未连接至互联网', '', '', '可能是因为', '', '')
+    yiyan = ""
     print("错误，可能是因为网络未连接")
-
 
 # 主循环
 while True:
@@ -123,6 +147,7 @@ while True:
 
     # 显示
     screen.blit(bg, (0, 0))  # 背景
-    print_time_txt(year, mon, dat, h, m, s)
-    print_tianqi_txt(*tianqi)
+    display_time_txt(year, mon, dat, h, m, s)
+    display_tianqi_txt(*tianqi)
+    Display_YiYan(yiyan)
     pygame.display.flip()
